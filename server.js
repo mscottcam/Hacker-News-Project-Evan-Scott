@@ -3,8 +3,11 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json();
 
 const { DATABASE, PORT } = require('./config');
+
+let knex = require('knex')(DATABASE);
 
 const app = express();
 
@@ -12,13 +15,28 @@ app.use(morgan(':method :url :res[location] :status'));
 
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.send('hello world');
-});
 // ADD ENDPOINTS HERE
 
 let server;
-let knex;
+
+app.get('/api/stories', (req, res) => {
+  res.status(200).send('hello world');
+  // knex select 20 storeis with most upvotes
+});
+
+// In postman: make sure to have appropriate body JSON being passed in - 
+//also set body type to raw - JSON (application(json))
+app.post('/api/stories', jsonParser, (req, res) => {
+  let story = req.body;
+  res.status(201).json(story);
+  knex('news')
+    .insert({
+      title: story.title,
+      url: story.url,
+      votes: 0
+    });
+});
+
 function runServer(database = DATABASE, port = PORT) {
   return new Promise((resolve, reject) => {
     try {
