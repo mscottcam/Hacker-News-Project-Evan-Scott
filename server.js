@@ -20,11 +20,17 @@ app.use(bodyParser.json());
 let server;
 
 app.get('/api/stories', (req, res) => {
-  res.status(200).send('hello world');
-  // knex select 20 storeis with most upvotes
+  knex('news')
+    .select('title', 'url', 'votes')
+    .limit(20)
+    .orderBy('votes', 'desc')
+    .then(results => {
+      res.status(200);
+      res.json(results);
+    })
 });
 
-// In postman: make sure to have appropriate body JSON being passed in - 
+// In postman: make sure to have appropriate body JSON being passed in -
 //also set body type to raw - JSON (application(json))
 app.post('/api/stories', jsonParser, (req, res) => {
   let story = req.body;
@@ -33,9 +39,13 @@ app.post('/api/stories', jsonParser, (req, res) => {
     .insert({
       title: story.title,
       url: story.url,
-      votes: 0
-    });
+      votes: story.votes
+    })
+    .then()
+    // results => console.log(results)
 });
+
+app.put()
 
 function runServer(database = DATABASE, port = PORT) {
   return new Promise((resolve, reject) => {
